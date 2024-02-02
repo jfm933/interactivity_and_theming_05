@@ -4,7 +4,9 @@ import 'package:flutter/widgets.dart';
 import 'package:interactivity_and_theming_05/models/expense.dart';
 
 class NewExpense extends StatefulWidget {
-  const NewExpense({super.key});
+  const NewExpense({super.key, required this.onAddExpense});
+
+  final void Function(Expense expense) onAddExpense;
 
   @override
   State<NewExpense> createState() => _NewExpenseState();
@@ -25,7 +27,8 @@ class _NewExpenseState extends State<NewExpense> {
 
   void _presentDatePicker() async {
     final now = DateTime.now();
-    final firstDate = DateTime(now.year, now.month - 1, now.day);
+    final firstDate =
+        DateTime(now.year, now.month - 1, now.add(Duration(days: 1)).day);
     final pickedDate = await showDatePicker(
         context: context, firstDate: firstDate, lastDate: now);
 
@@ -42,29 +45,37 @@ class _NewExpenseState extends State<NewExpense> {
         amountIsInvalid ||
         _selectedDate == null) {
       showDialog(
-          context: context,
-          builder: (ctx) {
-            return AlertDialog(
-              title: Text('Invalid input'),
-              content: Text(
-                  'Please enter a valid title, amount, date and category was selected.'),
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                    },
-                    child: Text('Okay'))
-              ],
-            );
-          });
-      return;
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            title: Text('Invalid input'),
+            content: Text(
+                'Please enter a valid title, amount, date and category was selected.'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                  },
+                  child: Text('Okay'))
+            ],
+          );
+        },
+      );
     }
+
+    widget.onAddExpense(Expense(
+      title: _titleController.text,
+      amount: enteredAmount!,
+      date: _selectedDate!,
+      category: _selectedCategory,
+    ));
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 48, 16, 16),
       child: Column(
         children: [
           TextField(
